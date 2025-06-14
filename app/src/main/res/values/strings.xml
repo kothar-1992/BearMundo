@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BearMod Target App</string>
+    <string name="signature_status">Checking signature...</string>
+    <string name="signature_valid">Signature is valid</string>
+    <string name="signature_invalid">Signature is invalid</string>
+</resources>

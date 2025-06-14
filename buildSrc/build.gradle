@@ -1,0 +1,8 @@
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    // Add any dependencies needed for buildSrc
+}

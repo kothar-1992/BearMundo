@@ -1,0 +1,104 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: .git/**/*, .github/**/*
+
+# Git Operations Guidelines
+
+## Repository Configuration
+- Remote URL: `https://github.com/ZeusOwner/BearMundo.git`
+- Default branch: `master`
+- Protected branches: `master`, `main`
+
+## Push Requirements
+1. Pre-push checks:
+   ```bash
+   # Check status
+   git status
+   
+   # Verify changes
+   git diff --staged
+   
+   # Run tests
+   ./gradlew test
+   ```
+
+2. Commit message format:
+   ```
+   type(scope): description
+   
+   - type: feat, fix, docs, style, refactor, test, chore
+   - scope: security, build, ci, docs
+   - description: concise summary
+   ```
+
+3. Branch naming:
+   ```
+   feature/security-enhancement
+   fix/keyauth-integration
+   docs/readme-update
+   ```
+
+## Security Guidelines
+- No sensitive data in commits
+- No API keys or secrets
+- No debug logs in production code
+- No hardcoded credentials
+
+## Push Process
+1. Update local repository:
+   ```bash
+   git fetch origin
+   git pull origin master
+   ```
+
+2. Create feature branch:
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+
+3. Make changes and commit:
+   ```bash
+   git add .
+   git commit -m "type(scope): description"
+   ```
+
+4. Push changes:
+   ```bash
+   git push origin feature/your-feature
+   ```
+
+## Protected Branch Rules
+- Require pull request reviews
+- Require status checks to pass
+- Require branches to be up to date
+- Include administrators
+
+## CI/CD Integration
+- Run tests before push
+- Verify security checks
+- Validate build process
+- Check code style
+
+## Error Handling
+- Handle merge conflicts
+- Resolve push rejections
+- Manage branch protection
+- Handle authentication issues
+
+## Documentation
+- Update README.md
+- Document API changes
+- Update security guidelines
+- Maintain changelog
+
+## Release Process
+1. Version bump
+2. Update changelog
+3. Create release tag
+4. Push to master
+5. Create GitHub release
+

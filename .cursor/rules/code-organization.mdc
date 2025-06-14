@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: *.java, *.kt, *.cpp, *.h, CMakeLists.txt, build.gradle*
+
+# Code & Project Structure Guidelines
+
+## Java/Kotlin Source Layout
+
+app/src/main/java/com/bearmod/
+├── core/                    # Core functionality
+│   ├── auth/               # Authentication
+│   ├── container/          # Container management
+│   ├── hooks/              # Hook management
+│   ├── security/           # Security features
+│   └── utils/              # Utility classes
+├── model/                  # Data models
+├── targetapp/             # Target application integration
+└── utils/                 # General utilities
+```
+
+### Native Code (C++)
+```
+app/src/main/cpp/
+├── core/                  # Core native functionality
+│   ├── security/         # Security features
+│   ├── container/        # Container management
+│   ├── memory/          # Memory operations
+│   ├── utils/           # Utility functions
+│   └── sdk/             # SDK integration
+├── BearMundoJNI.cpp     # JNI bridge
+└── native-lib.cpp       # Main native library
+```

@@ -1,0 +1,231 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: *.cpp, *.h, CMakeLists.txt, build.gradle.kts
+
+# KeyAuth Integration Guidelines
+
+## Project Structure
+- Main library: `security-lib/`
+- Container host: `container-host/`
+- Native code: `security-lib/src/main/cpp/`
+- JNI bridge: `security-lib/src/main/cpp/keyauth/`
+
+## Native Integration
+- Use KeyAuth C++ SDK v2.0.0 (from project dependencies)
+- Static linking only, no dynamic loading
+- Minimum NDK version: r25b
+- Target ABIs: arm64-v8a, x86_64, armeabi-v7a, x86
+- Build with `./gradlew :security-lib:assembleRelease`
+
+## JNI Bridge Implementation
+```cpp
+// security-lib/src/main/cpp/keyauth/KeyAuthBridge.cpp
+#include <jni.h>
+#include <string>
+#include "keyauth.h"
+#include "bear_mundo.h"  // Project-specific security
+
+extern "C" {
+    JNIEXPORT jboolean JNICALL
+    Java_com_bearmundo_security_KeyAuthBridge_authenticate(
+        JNIEnv* env, jobject thiz, jstring license) {
+        
+        // Security checks
+        if (!bear_mundo::verify_environment()) {
+            return JNI_FALSE;
+        }
+        
+        // Input validation
+        if (!license) {
+            bear_mundo::log_security_event("Null license");
+            return JNI_FALSE;
+        }
+        
+        // Convert Java string to C++
+        const char* license_str = env->GetStringUTFChars(license, nullptr);
+        if (!license_str) {
+            bear_mundo::log_security_event("License string conversion failed");
+            return JNI_FALSE;
+        }
+        
+        // Initialize KeyAuth with project config
+        KeyAuth::api KeyAuthApp(
+            bear_mundo::get_app_name(),
+            bear_mundo::get_owner_id(),
+            bear_mundo::get_version()
+        );
+        
+        // Authenticate with timeout
+        bool success = bear_mundo::authenticate_with_timeout(
+            KeyAuthApp, 
+            license_str,
+            std::chrono::seconds(5)
+        );
+        
+        // Cleanup
+        env->ReleaseStringUTFChars(license, license_str);
+        
+        return success ? JNI_TRUE : JNI_FALSE;
+    }
+}
+```
+
+## Security Requirements
+- Obfuscate license key storage:
+  ```cpp
+  // security-lib/src/main/cpp/keyauth/KeyAuthConfig.h
+  namespace bear_mundo {
+      class KeyAuthConfig {
+      private:
+          static constexpr auto APP_NAME = OBFUSCATE("bear-security");
+          static constexpr auto OWNER_ID = OBFUSCATE("bear-mundo");
+          static constexpr auto VERSION = OBFUSCATE("2.0.0");
+          
+          static std::string get_app_name() {
+              return deobfuscate(APP_NAME);
+          }
+      };
+  }
+  ```
+- Implement anti-debug checks:
+  ```cpp
+  // security-lib/src/main/cpp/keyauth/SecurityChecks.cpp
+  namespace bear_mundo {
+      bool verify_environment() {
+          return !is_debugger_present() &&
+                 verify_memory_integrity() &&
+                 check_container_security();
+      }
+  }
+  ```
+
+## Build Configuration
+```cmake
+# security-lib/src/main/cpp/CMakeLists.txt
+cmake_minimum_required(VERSION 3.22)
+
+# Project configuration
+project(bear_security VERSION 2.0.0)
+
+# KeyAuth library
+add_library(keyauth STATIC
+    keyauth/KeyAuthBridge.cpp
+    keyauth/SecurityChecks.cpp
+    keyauth/KeyAuthConfig.cpp
+)
+
+# Security flags
+target_compile_options(keyauth PRIVATE
+    -O2
+    -DNDEBUG
+    -fstack-protector-strong
+    -fPIC
+    -DKEYAUTH_VERSION=2.0.0
+)
+
+# Include directories
+target_include_directories(keyauth PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${ANDROID_NDK}/sources/cxx-stl/llvm-libc++/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/keyauth
+)
+
+# Link libraries
+target_link_libraries(keyauth
+    android
+    log
+    bear_mundo
+)
+```
+
+## Integration Steps
+1. Add KeyAuth SDK to project:
+   ```bash
+   # In security-lib/
+   ./gradlew :security-lib:dependencies
+   ./gradlew :security-lib:assembleRelease
+   ```
+
+2. Implement JNI bridge:
+   - Create `KeyAuthBridge.cpp`
+   - Add security measures
+   - Implement error handling
+
+3. Configure build system:
+   - Update CMakeLists.txt
+   - Add ProGuard rules
+   - Configure NDK settings
+
+4. Add security measures:
+   - Implement anti-debug
+   - Add memory protection
+   - Obfuscate sensitive data
+
+5. Test integration:
+   ```bash
+   ./gradlew :security-lib:test
+   ./gradlew :container-host:test
+   ```
+
+## Testing Requirements
+- Test with valid/invalid licenses:
+  ```cpp
+  TEST_CASE("License Validation") {
+      REQUIRE(bear_mundo::validate_license("valid-license"));
+      REQUIRE_FALSE(bear_mundo::validate_license("invalid-license"));
+  }
+  ```
+- Verify anti-tamper measures:
+  ```cpp
+  TEST_CASE("Anti-Tamper") {
+      REQUIRE(bear_mundo::verify_environment());
+      REQUIRE(bear_mundo::verify_memory_integrity());
+  }
+  ```
+
+## Error Handling
+- Handle network errors:
+  ```cpp
+  namespace bear_mundo {
+      bool handle_network_error() {
+          try {
+              // Network operations
+              return true;
+          } catch (const std::exception& e) {
+              log_security_event("Network error: %s", e.what());
+              return false;
+          }
+      }
+  }
+  ```
+
+## Release Checklist
+- [ ] SDK properly integrated
+  - [ ] KeyAuth v2.0.0 verified
+  - [ ] Static linking confirmed
+  - [ ] All dependencies included
+- [ ] Security measures implemented
+  - [ ] Anti-debug active
+  - [ ] Memory protection enabled
+  - [ ] Input validation complete
+- [ ] Error handling complete
+  - [ ] Network errors handled
+  - [ ] Invalid licenses managed
+  - [ ] Timeouts processed
+- [ ] Testing completed
+  - [ ] Unit tests passed
+  - [ ] Integration tests passed
+  - [ ] Security tests passed
+- [ ] Documentation updated
+  - [ ] API documentation
+  - [ ] Security guidelines
+  - [ ] Integration guide
+
+
+
+
+

@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: *.cpp, *.h, CMakeLists.txt, build.gradle*
+
+# JNI & Native Performance Guidelines
+
+## Optimization Targets
+- Minimize JNI calls and reduce JNI overhead
+- Use stack memory where possible, avoid heap allocations
+- Enable `-O2` or `-Os` in `CMakeLists.txt`
+- Strip unused symbols and debug info in release builds
+- Enable Link-Time Optimization (LTO) for `.so` output
+
+## ABI Strategy
+- Target only required ABIs: `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`
+- Measure `.so` size and startup impact for each ABI
+
+## Build Performance
+- Use Gradle configuration caching and parallel build
+- Avoid redundant rebuilds by isolating C++ modules
+- Enable `ccache` in Docker or local builds if supported
+
+## Runtime Monitoring
+- Profile with Android Studio Profiler (memory, CPU, native heap)
+- Use `__android_log_print()` for native timing markers
+- Validate JNI memory leaks and reference counts
+
+## Checklist Before Packaging
+- [ ] JNI calls optimized and batched
+- [ ] Unused symbols removed (strip pass)
+- [ ] `.so` size verified across ABIs
+- [ ] Debug output removed for release
+- [ ] Build cache and incremental compile tested

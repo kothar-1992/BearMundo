@@ -1,0 +1,43 @@
+{
+  "name": "BearSecurityProject",
+  "description": "Secure Android AAR and Host Container Project using KeyAuth and Bear Mundo",
+  "version": "1.0.0",
+  "author": "Bear Mundo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bearmundo/bear-security-project"
+  },
+  "dependencies": {
+    "keyauth": "^2.0.0",
+    "bear-mundo": "^1.0.0"
+  },
+  "components": [
+    {
+      "name": "security-lib",
+      "path": "./security-lib",
+      "type": "android-library",
+      "build": {
+        "script": "./gradlew :security-lib:assembleRelease"
+      }
+    },
+    {
+      "name": "container-host",
+      "path": "./container-host",
+      "type": "android-app",
+      "depends_on": ["security-lib"],
+      "build": {
+        "script": "./gradlew :container-host:installDebug"
+      }
+    }
+  ],
+  "build_all": {
+    "script": "./gradlew build"
+  },
+  "default_component": "security-lib",
+  "scripts": {
+    "clean": "./gradlew clean",
+    "test": "./gradlew test",
+    "lint": "./gradlew lint"
+  }
+} 

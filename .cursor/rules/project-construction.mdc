@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Manual
+File pattern matches: *.cpp, *.h, CMakeLists.txt, build.gradle*
+
+# Project Construction Broadcasting Guidelines
+
+## Build Status Broadcasting
+- Implement build status notifications for all major build stages
+- Use clear, consistent status messages
+- Include build duration and memory usage metrics
+- Broadcast errors with detailed context and stack traces
+
+## Progress Reporting
+- Show real-time progress for long-running operations
+- Display percentage completion for build steps
+- Indicate current operation and next steps
+- Provide estimated time remaining when possible
+
+## Error Handling
+- Broadcast critical errors immediately
+- Include error codes and descriptions
+- Provide actionable error messages
+- Log full error context for debugging
+
+## Performance Metrics
+- Report build time for each major component
+- Track memory usage during build
+- Monitor CPU utilization
+- Log resource-intensive operations
+
+## Notification Channels
+- Console output for immediate feedback
+- Log files for detailed history
+- Status files for build tools
+- Progress indicators for UI integration
+
+## Best Practices
+- Use consistent message formatting
+- Implement proper log levels (DEBUG, INFO, WARNING, ERROR)
+- Include timestamps in all broadcasts
+- Maintain backward compatibility in message formats
+
+## Integration Guidelines
+- Support multiple output formats (text, JSON, XML)
+- Enable/disable specific broadcast channels
+- Allow filtering of broadcast messages
+- Provide hooks for custom broadcast handlers
+
+

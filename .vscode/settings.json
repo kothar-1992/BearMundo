@@ -1,0 +1,4 @@
+{
+    "python.analysis.typeCheckingMode": "standard",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

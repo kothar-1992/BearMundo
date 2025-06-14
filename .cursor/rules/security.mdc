@@ -1,0 +1,122 @@
+---
+description: 
+globs: *.cpp,*.java,*.kts
+alwaysApply: false
+---
+**Title:** Secure Native Coding Rules
+**Type:** Auto Attached
+**Matches:** *.cpp, *.java, *.kts, CMakeLists.txt
+
+
+Rule Type: Auto Attached
+File pattern matches: *.cpp, *.java, *.kt, CMakeLists.txt
+
+# Bear Security & Stealth Coding Guidelines
+
+## JNI + C++ Security
+- Validate all Java input in C++ using `JNIEnv::GetStringUTFChars` with null checks
+- Use RAII wrappers (`ScopedUtfChars`, `ScopedLocalRef`) for JNI resources
+- Mark JNI functions as `const` and `noexcept` where possible
+- Implement input sanitization for all JNI parameters
+- Use `jni::ThrowNew` for proper exception handling
+
+## Anti-Tamper Implementation
+- Memory scanning:
+  ```cpp
+  bool detect_memory_tampering() {
+    std::ifstream maps("/proc/self/maps");
+    return scan_memory_regions(maps);
+  }
+  ```
+- JNI obfuscation:
+  ```cpp
+  #define JNI_FUNC(name) Java_com_happy_pro_##name
+  #define OBFUSCATE(str) obfuscate_string(str)
+  ```
+- KeyAuth protection:
+  ```cpp
+  class KeyAuthValidator {
+    static constexpr auto LICENSE_KEY = OBFUSCATE("your-key");
+    // ...
+  };
+  ```
+
+## Secure Logging
+- Debug logging:
+  ```cpp
+  #ifdef DEBUG
+    #define LOG_DEBUG(fmt, ...) __android_log_print(ANDROID_LOG_DEBUG, "Bear", fmt, ##__VA_ARGS__)
+  #else
+    #define LOG_DEBUG(fmt, ...)
+  #endif
+  ```
+- Release logging:
+  ```cpp
+  #define LOG_RELEASE(fmt, ...) __android_log_print(ANDROID_LOG_INFO, "Bear", fmt, ##__VA_ARGS__)
+  ```
+
+## Root Detection
+- Implement multiple detection methods:
+  ```cpp
+  bool check_root() {
+    return check_su_binary() || 
+           check_magisk() || 
+           check_system_props();
+  }
+  ```
+- Cache results:
+  ```cpp
+  class RootDetector {
+    static std::atomic<bool> cached_result;
+    static std::once_flag init_flag;
+  };
+  ```
+
+## Hook Detection
+- Library integrity:
+  ```cpp
+  bool verify_library_integrity() {
+    return verify_library_hash() && 
+           check_library_memory() &&
+           detect_injection_points();
+  }
+  ```
+- Runtime checks:
+  ```cpp
+  bool detect_hooks() {
+    return scan_frida() || 
+           scan_xposed() || 
+           scan_substrate();
+  }
+  ```
+
+## Release Validation
+- [ ] Run `strip -s` on all `.so` files
+- [ ] Verify no debug symbols in release build
+- [ ] Test JNI method exposure with `nm -D`
+- [ ] Validate root detection against known root methods
+- [ ] Test KeyAuth against stub attempts
+- [ ] Run container tests (X8 brands)
+- [ ] Verify memory protection
+- [ ] Check hook detection effectiveness
+
+## Build Security
+- CMake configuration:
+  ```cmake
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -DNDEBUG")
+  add_definitions(-DRELEASE_BUILD)
+  ```
+- ProGuard rules:
+  ```proguard
+  -keepclassmembers class * {
+      native <methods>;
+  }
+  -dontwarn com.keyauth.**
+  ```
+
+## Testing Requirements
+- Unit tests for all security checks
+- Integration tests with tampered containers
+- Performance benchmarks for security features
+- Memory leak tests for JNI operations
+- Stress tests for root detection

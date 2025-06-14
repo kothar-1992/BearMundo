@@ -1,0 +1,44 @@
+---
+description: .kts, *.cpp, *.h,
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: build.gradle.kts, *.cpp, *.h, CMakeLists.txt, AndroidManifest.xml
+
+# BearSecurity AAR Build Rule
+
+Build the `bearsecurity-release.aar` as a **native C++ Android library** (no UI) for secure integration into container-based loaders.
+
+## Key Requirements
+
+- **JNI Bridge:**  
+  Expose `Java_com_happy_pro_KeyAuthBridge_authenticate` for KeyAuth v1.3 C++ SDK.
+  Ensure this is the only Java interface exposed.
+
+- **NDK Settings:**  
+  - Use Android NDK r25b  
+  - Supported ABIs: `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`
+
+- **C++ Native Code:**  
+  - No usage of `curl`, `libssl`, or OpenSSL
+  - Must statically link against KeyAuth C++ SDK only
+  - JNI exceptions must log via `__android_log_print`
+
+- **CMake/Gradle Integration:**  
+  - Use CMakeLists.txt under `app/src/main/cpp/`
+  - No application ID or activity should exist
+  - No `res/`, `drawable/`, or layout resources needed
+
+- **Output Artifact:**  
+  The final output must be:  
+  `build/outputs/aar/bearsecurity-release.aar`
+
+## Build Notes
+
+This AAR will be consumed by:
+- `BearMod-Loader`
+- `Bear-Container`
+- `Frida container patch toolset`
+
+It must remain **small, secure, headless**, and **reusable** across all loader flavors.

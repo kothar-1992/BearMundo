@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Rule Type: Auto Attached
+File pattern matches: Dockerfile, *.gradle, CMakeLists.txt, *.cpp, *.h, .github/workflows/*
+
+# BearProject Secure AAR Workflow (CI/Dev)
+
+## Build Environment
+- Docker: `android-ndk-r25b`
+- Tools: CMake 3.22+, Gradle 8.0+, NDK r25b
+- Resources: 8GB RAM, 20GB disk
+
+## Build Steps
+1. Initialize:
+   ```bash
+   docker-compose up -d
+   docker-compose exec builder ./init_build.sh
+   ```
+
+2. Build Native:
+   ```bash
+   cd src/main/cpp
+   cmake -DCMAKE_BUILD_TYPE=Release \
+         -DANDROID_ABI="arm64-v8a;x86_64;armeabi-v7a;x86" \
+         -DANDROID_NDK=/opt/android-ndk-r25b
+   cmake --build . --config Release
+   strip -s lib/*.so
+   ```
+
+3. Package:
+   ```bash
+   ./gradlew assembleRelease
+   ```
+
+## Validation
+- [ ] `.so` files stripped
+- [ ] No OpenSSL/cURL deps
+- [ ] JNI symbols exported
+- [ ] ProGuard rules applied
+- [ ] AAR < 5MB
+- [ ] All ABIs verified
+
+## CI/CD
+- Triggers: main push, PR, manual
+- Matrix: arm64-v8a, x86_64, armeabi-v7a, x86
+- Output: AAR + SHA256 in releases
+
+## Deployment
+1. Version:
+   - Update `build.gradle`
+   - Tag release
+
+2. Distribute:
+   - Upload to Maven
+   - Update BearMod-Loader
+   - Deploy containers
+
+## Error Handling
+- Log to `build.log`
+- Notify on critical errors
+- Create issues for failures
+- Rollback on deploy fail
+
+## Security
+- Sign AAR
+- Verify deps
+- Scan vulns
+- Check checksums
